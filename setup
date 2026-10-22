@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+# Idempotent setup for dotenv Manager.
+#
+# The runtime is stdlib-only, so there is nothing to install. This script only
+# checks that a compatible Python 3 interpreter is available and exits 0.
+set -eu
+
+DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+if ! command -v python3 >/dev/null 2>&1; then
+    echo "error: python3 is required but was not found in PATH" >&2
+    exit 1
+fi
+
+if ! python3 -c 'import sys; raise SystemExit(0 if sys.version_info >= (3, 8) else 1)'; then
+    echo "error: Python 3.8 or newer is required" >&2
+    exit 1
+fi
+
+chmod +x "$DIR/app" 2>/dev/null || true
+echo "dotenv Manager is ready (Python $(python3 -c 'import platform; print(platform.python_version())'), stdlib only)."
