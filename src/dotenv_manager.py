@@ -63,10 +63,11 @@ class DotenvError(Exception):
 # ---------------------------------------------------------------------------
 
 
-def parse_env_file(path):
+def parse_env_file(path, show_values=False):
     """Parse a dotenv file into an ordered dict of ``key -> value``.
 
     Raises ``DotenvError`` on any construction outside the supported subset.
+    Error messages never echo raw values unless ``show_values`` is true.
     """
     try:
         with open(path, "rb") as handle:
@@ -124,7 +125,9 @@ def parse_env_file(path):
             )
 
         key_part, value = stripped.split("=", 1)
-        key = key_part.strip()
+        # Only whitespace before the key (on the line) is ignored; any
+        # whitespace between the key and '=' makes the key invalid.
+        key = key_part
 
         if not KEY_RE.match(key):
             raise DotenvError(
@@ -135,9 +138,14 @@ def parse_env_file(path):
 
         match = INTERPOLATION_RE.search(value)
         if match:
+            if show_values:
+                raise DotenvError(
+                    "file '{0}', line {1}: variable interpolation is not "
+                    "supported ('{2}')".format(path, lineno, match.group(0))
+                )
             raise DotenvError(
                 "file '{0}', line {1}: variable interpolation is not "
-                "supported ('{2}')".format(path, lineno, match.group(0))
+                "supported".format(path, lineno)
             )
 
         if key in values:
@@ -467,8 +475,8 @@ def parse_command_line(argv):
 
 
 def run_diff(options):
-    old_values = parse_env_file(options["old"])
-    new_values = parse_env_file(options["new"])
+    old_values = parse_env_file(options["old"], options["show_values"])
+    new_values = parse_env_file(options["new"], options["show_values"])
 
     schema = None
     if options["schema"] is not None:
