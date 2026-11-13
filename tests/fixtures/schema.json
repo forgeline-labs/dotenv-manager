@@ -1,0 +1,4 @@
+{
+  "PORT": { "type": "number" },
+  "DEBUG": { "type": "boolean" }
+}

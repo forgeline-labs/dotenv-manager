@@ -1,0 +1,8 @@
+#!/usr/bin/env python3
+"""Idempotent, stdlib-only setup for every supported platform."""
+import sys
+
+if sys.version_info < (3, 8):
+    sys.stderr.write("error: Python 3.8 or newer is required\n")
+    raise SystemExit(1)
+print("dotenv Manager is ready (stdlib only).")
