@@ -194,14 +194,16 @@ they were not written by a person.
 
 ## Tests
 
-The public suite is black-box and uses only the standard library:
+The public suite uses only the standard library. Acceptance tests run the CLI;
+a unit regression injects read permission failure without depending on POSIX modes:
 
 ```bash
 python3 -m unittest discover -s tests -v
 ```
 
-Every test invokes `./app` as a subprocess and asserts on exit code, `stdout`,
-`stderr`, and the `--json` payload. No test imports implementation modules.
+Acceptance tests invoke the entry point as a subprocess and assert on exit code,
+`stdout`, `stderr`, and the `--json` payload. The permission regression imports
+the implementation to inject `PermissionError` on every platform.
 
 ## Lint
 
@@ -228,3 +230,9 @@ flowchart LR
 ## License
 
 MIT — see [LICENSE](LICENSE).
+
+## Windows
+
+Use Python 3 from PATH. PowerShell and cmd can run `app.cmd`;
+`python app` invokes the same entry point. UTF-8 output and LF line endings
+are consistent across platforms. CI runs the visible suite on Ubuntu and Windows.

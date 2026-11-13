@@ -26,7 +26,7 @@ def fx(name):
 
 def run(*args):
     return subprocess.run(
-        [APP, *args], capture_output=True, text=True, timeout=60
+        [sys.executable, APP, *args], capture_output=True, text=True, encoding="utf-8", timeout=60
     )
 
 
@@ -327,8 +327,8 @@ class EdgeCases(unittest.TestCase):
         self.assertNotIn("validation", proc.stderr.lower())
 
     def test_ec_15_permission_denied(self):
-        if os.geteuid() == 0:
-            self.skipTest("root can read files regardless of mode")
+        if os.name == "nt" or (hasattr(os, "geteuid") and os.geteuid() == 0):
+            self.skipTest("POSIX read mode bits unavailable or not enforced for this user")
         with tempfile.TemporaryDirectory() as tmp:
             noaccess = os.path.join(tmp, "noaccess.env")
             accessible = os.path.join(tmp, "accessible.env")
